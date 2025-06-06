@@ -128,6 +128,8 @@ var options = {
             );
           },
         },
+        { from: 'src/static/three.min.js', to: 'three.min.js' },
+        { from: 'src/static/vanta.fog.min.js', to: 'vanta.fog.min.js' },
       ],
     }),
     new CopyWebpackPlugin({
