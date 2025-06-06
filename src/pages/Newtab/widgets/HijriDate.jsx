@@ -229,7 +229,7 @@ const HijriDate = () => {
       </div>
 
       {/* Bottom left: Big day, month, year */}
-      <div className="absolute bottom-6 left-6 flex items-end gap-4">
+      <div className="absolute bottom-6 left-6 flex items-end gap-3">
         <span
           className="text-white text-6xl md:text-7xl font-medium leading-none drop-shadow-lg -tracking-[0.05em] transition-opacity duration-500"
           style={{

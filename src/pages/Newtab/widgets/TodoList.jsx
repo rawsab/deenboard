@@ -129,7 +129,7 @@ const TodoList = () => {
       </div>
       {/* Todo list */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto pr-1"
+        className="flex-1 min-h-0 overflow-y-auto pr-1 custom-scrollbar"
         style={{ maxHeight: 240 }}
       >
         {todos.length === 0 && (
@@ -172,7 +172,7 @@ const TodoList = () => {
               {editingId === todo.id ? (
                 <input
                   ref={(el) => (inputRefs.current[todo.id] = el)}
-                  className="flex-1 bg-transparent border-none outline-none text-base text-[#7E8884] font-medium px-1 py-0.5 rounded break-words whitespace-pre-line hyphens-auto -tracking-[0.025em]"
+                  className="flex-1 bg-transparent border-none outline-none text-[14px] text-[#2B2B2B] font-medium px-1 py-0.5 rounded break-words whitespace-pre-line hyphens-auto -tracking-[0.025em]"
                   value={inputVals[todo.id] ?? todo.text}
                   onChange={(e) => handleEdit(todo.id, e.target.value)}
                   onBlur={() => handleBlur(todo.id)}
@@ -187,10 +187,10 @@ const TodoList = () => {
                 />
               ) : (
                 <span
-                  className={`flex-1 text-base font-medium px-1 py-0.5 rounded cursor-pointer select-text transition-all duration-200 break-words whitespace-pre-line hyphens-auto -tracking-[0.025em] ${
+                  className={`flex-1 text-[14px] font-medium px-1 py-0.5 rounded cursor-pointer select-text transition-all duration-200 break-words whitespace-pre-line hyphens-auto -tracking-[0.025em] ${
                     todo.checked
                       ? 'line-through text-[#BDC8C2]'
-                      : 'text-[#2B2B2B]'
+                      : 'text-[#7E8884]'
                   } group-hover:bg-[#F2F4F3]`}
                   onClick={() => handleTextClick(todo.id)}
                   tabIndex={0}
@@ -212,4 +212,5 @@ const TodoList = () => {
     </div>
   );
 };
+
 export default TodoList;
