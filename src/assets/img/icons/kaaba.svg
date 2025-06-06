@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="39px" height="46px" viewBox="0 0 39 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group</title>
+    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linejoin="round">
+        <g id="Group" transform="translate(1.738798, 1.541990)" stroke="#2B2B2B" stroke-width="2">
+            <polygon id="Path" points="17.811202 0 0 7.92387621 17.811202 16.0820436 35.8345896 8.04102178"></polygon>
+            <path d="M35.8345896,8.04102178 L35.8345896,34.8151047 L17.811202,43.0481429 L0,34.8151047 L0,8.04102178 L17.9172948,16.0820436 L35.8345896,8.04102178 Z M35.261202,14.4580097 L18.261202,22.4580097 L18.261202,29.4580097 L35.261202,21.4580097 L35.261202,14.4580097 Z M0.261202033,14.4580097 L0.261202033,21.4580097 L17.261202,29.4580097 L17.261202,22.4580097 L0.261202033,14.4580097 Z" id="Combined-Shape" fill="#2B2B2B"></path>
+        </g>
+    </g>
+</svg>
