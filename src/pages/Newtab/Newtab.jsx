@@ -61,22 +61,22 @@ const Newtab = () => {
         className="fixed inset-0 flex items-center justify-center no-scrollbar"
         style={{ height: '100vh', width: '100vw' }}
       >
+        {/* Top radial background */}
+        <img
+          src={topRadial}
+          alt="top radial"
+          className="pointer-events-none select-none absolute top-0 left-0 w-full h-auto z-0"
+          style={{ maxHeight: '400px', objectFit: 'cover' }}
+        />
+        {/* Bottom radial background */}
+        <img
+          src={bottomRadial}
+          alt="bottom radial"
+          className="pointer-events-none select-none absolute bottom-0 left-0 w-full h-auto z-0"
+          style={{ maxHeight: '400px', objectFit: 'cover' }}
+        />
         <div className="scale-outer">
           <div className="relative p-6 flex flex-col items-center justify-center gap-6 overflow-hidden">
-            {/* Top radial background */}
-            <img
-              src={topRadial}
-              alt="top radial"
-              className="pointer-events-none select-none absolute top-0 left-0 w-full h-auto z-0"
-              style={{ maxHeight: '400px', objectFit: 'cover' }}
-            />
-            {/* Bottom radial background */}
-            <img
-              src={bottomRadial}
-              alt="bottom radial"
-              className="pointer-events-none select-none absolute bottom-0 left-0 w-full h-auto z-0"
-              style={{ maxHeight: '400px', objectFit: 'cover' }}
-            />
             {/* Main content */}
             <div className="relative z-10">
               {/* Welcome message and Google search bar */}
