@@ -1,6 +1,8 @@
 {
   "manifest_version": 3,
   "name": "DeenBoard",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiBGkmPMJD6G4B35ghOMGL/J7wtyEXo/usHOOt3l5ath/Wuqm1M+F8dY0dTGdhdi2B18ByAEtJ/tP29NqfssadlV7IYFOL67qsgeeWVnyMIM2h1MMwkrnfGjXWVkqI4geV6Au8GKitK3hw3HwnUS4op1tMjpLwZeoKyRizRBi9pTRL67nCnpzgIKUOkxcw3qazwYq1zOmx3MF7JyRYSLv/y084T2GQQR9ADHS6wj26uAjBoa/G9621d96u5C71F/Zb4MLbpN2ldFy3LVhzYZ4/GEwxXjOIbXfyMGCna1vpU1Zzx83Ztlp3Jg9D60bLzQoxsT8xckPdGVbGjb1j5gPgQIDAQAB",
+  "version": "1.0.0",
   "description": "A beautiful homepage dashboard to meet all your Islamic needs.",
   "options_page": "options.html",
   "background": { "service_worker": "background.bundle.js" },
@@ -33,5 +35,10 @@
       ],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "oauth2": {
+    "client_id": "252877932218-9ra7i1vf0lj3fal4m114moumn2su2hhp.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/calendar.readonly"]
+  },
+  "permissions": ["identity"]
 }
