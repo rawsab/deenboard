@@ -45,15 +45,21 @@ function AnimatedDots() {
   );
 }
 
+const PRAYER_TIMES_KEY = 'deenboard_prayer_times';
+
 const NextPrayerCountdown = () => {
   const [alarmEnabled, setAlarmEnabled] = useState(() => {
     const saved = localStorage.getItem('nextPrayerAlarmEnabled');
     return saved === null ? true : saved === 'true';
   });
-  const [prayerTimes, setPrayerTimes] = useState(null);
+  const [prayerTimes, setPrayerTimes] = useState(() => {
+    const stored = localStorage.getItem(PRAYER_TIMES_KEY);
+    return stored ? JSON.parse(stored) : null;
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [now, setNow] = useState(new Date());
+  const [alarmHover, setAlarmHover] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000);
@@ -93,6 +99,7 @@ const NextPrayerCountdown = () => {
               cacheDate.getFullYear() === today.getFullYear()
             ) {
               setPrayerTimes(timings);
+              localStorage.setItem(PRAYER_TIMES_KEY, JSON.stringify(timings));
               setLoading(false);
               return;
             }
@@ -104,6 +111,10 @@ const NextPrayerCountdown = () => {
           const data = await res.json();
           if (data.code === 200 && data.data && data.data.timings) {
             setPrayerTimes(data.data.timings);
+            localStorage.setItem(
+              PRAYER_TIMES_KEY,
+              JSON.stringify(data.data.timings)
+            );
             localStorage.setItem(
               cacheKey,
               JSON.stringify({
@@ -133,11 +144,11 @@ const NextPrayerCountdown = () => {
 
   return (
     <div
-      className="relative w-full h-full rounded-[25px] bg-white overflow-hidden flex flex-col justify-between px-9 pt-7 pb-0"
+      className="widget-card relative w-full h-full rounded-[25px] bg-white/80 overflow-hidden flex flex-col justify-between px-9 pt-7 pb-0"
       style={{ fontFamily: 'Wix Madefor Display' }}
     >
       {/* Top left: Until next prayer */}
-      <div className="absolute top-4 left-5 text-[#2B2B2B] text-lg font-regular -tracking-[0.025em]">
+      <div className="absolute top-[17px] left-5 text-[#2B2B2B] text-[1.0rem] font-regular -tracking-[0.025em]">
         Until{' '}
         <span className="font-semibold">
           {nextName.charAt(0).toUpperCase() + nextName.slice(1)}
@@ -145,13 +156,22 @@ const NextPrayerCountdown = () => {
       </div>
       {/* Top right: Alarm icon */}
       <button
-        className="absolute top-4 right-4 transition-opacity duration-300"
+        className="absolute top-2 right-3 transition-opacity duration-300"
         onClick={() => setAlarmEnabled((v) => !v)}
         style={{
           opacity: alarmEnabled ? 1 : 0.4,
           filter: alarmEnabled ? 'grayscale(0%)' : 'grayscale(80%)',
-          transition: 'opacity 0.3s, filter 0.3s',
+          transition: 'opacity 0.3s, filter 0.3s, background 0.5s',
+          background: alarmHover ? '#E2F6EE' : 'transparent',
+          borderRadius: '50%',
+          width: 40,
+          height: 40,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
+        onMouseEnter={() => setAlarmHover(true)}
+        onMouseLeave={() => setAlarmHover(false)}
         title={alarmEnabled ? 'Alarm enabled' : 'Alarm disabled'}
       >
         <img src={AlarmIcon} alt="Alarm" className="w-7 h-7" />
@@ -159,10 +179,10 @@ const NextPrayerCountdown = () => {
       {/* Bottom left: Countdown */}
       <div className="absolute bottom-5 left-5 flex flex-col gap-1">
         <div className="flex items-end gap-2">
-          <span className="text-[#2B2B2B] text-5xl font-regular leading-none -tracking-[0.025em]">
+          <span className="text-[#2B2B2B] text-5xl font-regular leading-none -tracking-[0.05em]">
             {loading ? '...' : hours}
           </span>
-          <span className="text-[#7E8884] text-xl font-regular mb-0 -tracking-[0.025em]">
+          <span className="text-[#7E8884] text-xl font-regular mb-0 -tracking-[0.05em]">
             {hours === 1 ? 'hour' : 'hours'}
           </span>
         </div>

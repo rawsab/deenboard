@@ -3,8 +3,8 @@ import React, { useRef, useState, useEffect } from 'react';
 function PlusIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
-      <rect x="9" y="4" width="2" height="12" rx="1" fill="#14452D" />
-      <rect x="4" y="9" width="12" height="2" rx="1" fill="#14452D" />
+      <rect x="9" y="4" width="2" height="12" rx="1" fill="#5FBE92" />
+      <rect x="4" y="9" width="12" height="2" rx="1" fill="#5FBE92" />
     </svg>
   );
 }
@@ -14,6 +14,7 @@ const TodoList = () => {
   const [editingId, setEditingId] = useState(null);
   const [inputVals, setInputVals] = useState({});
   const inputRefs = useRef({});
+  const [addHover, setAddHover] = useState(false);
 
   // Load todos from localStorage on mount
   useEffect(() => {
@@ -104,7 +105,7 @@ const TodoList = () => {
 
   return (
     <div
-      className="w-full h-full rounded-[25px] bg-white flex flex-col p-4 relative overflow-hidden"
+      className="widget-card w-full h-full rounded-[25px] bg-white/80 flex flex-col p-4 relative overflow-hidden"
       style={{ fontFamily: 'Wix Madefor Display' }}
     >
       {/* Top row */}
@@ -113,11 +114,26 @@ const TodoList = () => {
           To-do
         </div>
         <button
-          className="flex items-center gap-1 px-2 py-1 rounded-full bg-white hover:bg-[#F2F4F3] border border-[#0F3323] transition-colors text-[#0F3323] font-semibold text-base select-none"
+          className="flex items-center justify-center"
           onClick={addTodo}
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: '50%',
+            background: addHover
+              ? 'rgba(95,190,146,0.22)'
+              : 'rgba(95,190,146,0.12)',
+            border: 'none',
+            outline: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 1px 4px 0 rgba(0,0,0,0.04)',
+            transition: 'background 0.5s',
+          }}
+          title="Add New Todo"
+          onMouseEnter={() => setAddHover(true)}
+          onMouseLeave={() => setAddHover(false)}
         >
-          <PlusIcon size={14} />
-          <span className="font-semibold text-xs -tracking-[0.02em]">New</span>
+          <PlusIcon size={16} />
         </button>
       </div>
       {/* Remaining count */}
@@ -146,7 +162,7 @@ const TodoList = () => {
             >
               {/* Checkbox */}
               <button
-                className={`w-4 h-4 rounded-[6px] border-2  flex items-center justify-center transition-colors duration-200 mt-2 -tracking-[0.025em] ${
+                className={`w-4 h-4 rounded-[6px] border-2  flex items-center justify-center transition-colors duration-200 mt-[5px] -tracking-[0.025em] ${
                   todo.checked
                     ? 'bg-[#14452D] border-[#14452D]'
                     : 'hover:bg-[#EBEEED] border-[#D4DAD6] bg-[#F1F7F3]'
@@ -177,7 +193,7 @@ const TodoList = () => {
                   onChange={(e) => handleEdit(todo.id, e.target.value)}
                   onBlur={() => handleBlur(todo.id)}
                   onKeyDown={(e) => handleKeyDown(e, todo.id)}
-                  maxLength={60}
+                  maxLength={100}
                   style={{
                     minWidth: 0,
                     wordBreak: 'break-word',

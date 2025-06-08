@@ -37,13 +37,14 @@ code {
 
 @media (min-width: 1800px) {
   .scale-outer {
-    transform: scale(1.15);
+    transform: scale(1.25);
     transform-origin: center center;
     max-height: calc(100vh / 1.15);
     max-width: calc(100vw / 1.15);
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-bottom: 50px;
   }
 }
 
@@ -56,4 +57,23 @@ body {
 .no-scrollbar {
   height: 100vh;
   overflow: hidden;
+}
+
+.widget-card {
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+.widget-card:hover {
+  transform: scale(0.98);
+  z-index: 2;
+}
+
+.search-bar {
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.search-bar:hover {
+  transform: scale(1.02);
+  z-index: 2;
 }

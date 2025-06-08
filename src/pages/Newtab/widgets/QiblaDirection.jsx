@@ -26,8 +26,13 @@ function getQiblaAngle(lat, lon) {
   return (brng + 360) % 360; // in degrees, relative to north
 }
 
+const QIBLA_KEY = 'deenboard_qibla_angle';
+
 const QiblaDirection = () => {
-  const [angle, setAngle] = useState(null);
+  const [angle, setAngle] = useState(() => {
+    const stored = localStorage.getItem(QIBLA_KEY);
+    return stored !== null ? parseFloat(stored) : null;
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [displayAngle, setDisplayAngle] = useState(0);
@@ -44,6 +49,7 @@ const QiblaDirection = () => {
         const { latitude, longitude } = pos.coords;
         const qibla = getQiblaAngle(latitude, longitude);
         setAngle(qibla);
+        localStorage.setItem(QIBLA_KEY, qibla.toString());
         setLoading(false);
       },
       () => {
@@ -86,7 +92,7 @@ const QiblaDirection = () => {
 
   return (
     <div
-      className="w-full h-full min-h-[170px] min-w-[170px] rounded-[25px] bg-white flex flex-col items-center justify-center relative overflow-hidden"
+      className="widget-card w-full h-full min-h-[170px] min-w-[170px] rounded-[25px] bg-white/80 flex flex-col items-center justify-center relative overflow-hidden"
       style={{ fontFamily: 'Wix Madefor Display', padding: 0 }}
     >
       {/* Compass background */}
@@ -150,11 +156,11 @@ const QiblaDirection = () => {
         />
       </div>
       {/* Content overlay */}
-      <div className="relative z-10 flex flex-col items-center justify-center mt-[130px]">
+      {/* <div className="relative z-10 flex flex-col items-center justify-center mt-[130px]">
         {loading ? (
           <div className="text-gray-500 text-lg mt-2 -mb-1">Loading...</div>
         ) : null}
-      </div>
+      </div> */}
     </div>
   );
 };

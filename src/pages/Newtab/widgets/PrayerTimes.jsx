@@ -12,7 +12,19 @@ const MADHABS = [
 
 const PRAYER_ORDER = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
-const MARKER_OFFSETS = [0.06, 0.26, 0.48, 0.7, 0.94]; // [Fajr, Dhuhr, Asr, Maghrib, Isha]
+// Marker labels and manual offsets
+const MARKER_LABELS = [
+  '12AM',
+  'Fajr',
+  'Dhuhr',
+  'Asr',
+  'Maghrib',
+  'Isha',
+  '11:59PM',
+];
+// Set to a value between 0 and 1 to manually position, or null to use calculated time
+// 0% (12AM), 6% (Fajr), 28% (Dhuhr), 50% (Asr), 72% (Maghrib), 94% (Isha), 100% (11:59PM)
+const MARKER_OFFSETS = [0, 0.06, 0.28, 0.5, 0.72, 0.94, 1];
 
 // Helper to format 24h time to 12h with AM/PM
 function formatTime24to12(time24) {
@@ -47,6 +59,8 @@ function AnimatedDots() {
   );
 }
 
+const PRAYER_TIMES_KEY = 'deenboard_prayer_times';
+
 const PrayerTimes = () => {
   // Persist madhab selection in localStorage
   const [madhab, setMadhab] = useState(() => {
@@ -57,12 +71,17 @@ const PrayerTimes = () => {
   });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [location, setLocation] = useState('...');
-  const [prayerTimes, setPrayerTimes] = useState(null);
+  const [prayerTimes, setPrayerTimes] = useState(() => {
+    const stored = localStorage.getItem(PRAYER_TIMES_KEY);
+    return stored ? JSON.parse(stored) : null;
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [now, setNow] = useState(new Date());
   const dropdownBtnRef = useRef(null);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
+  const [madhabHover, setMadhabHover] = useState(false);
+  const [animatedProgress, setAnimatedProgress] = useState(0);
 
   // Update current time every minute
   useEffect(() => {
@@ -160,12 +179,18 @@ const PrayerTimes = () => {
         let selectedTimings = selectedMadhabId === 1 ? timings1 : timings0;
         if (selectedTimings) {
           setPrayerTimes(selectedTimings);
+          localStorage.setItem(
+            PRAYER_TIMES_KEY,
+            JSON.stringify(selectedTimings)
+          );
           setLoading(false);
         } else if (selectedMadhabId === 1 && lastCached1) {
           setPrayerTimes(lastCached1);
+          localStorage.setItem(PRAYER_TIMES_KEY, JSON.stringify(lastCached1));
           setLoading(false);
         } else if (selectedMadhabId === 0 && lastCached0) {
           setPrayerTimes(lastCached0);
+          localStorage.setItem(PRAYER_TIMES_KEY, JSON.stringify(lastCached0));
           setLoading(false);
         }
         // Always fetch and cache new data in the background
@@ -184,6 +209,10 @@ const PrayerTimes = () => {
               );
               if (getMadhabId(madhab) === madhabId) {
                 setPrayerTimes(data.data.timings);
+                localStorage.setItem(
+                  PRAYER_TIMES_KEY,
+                  JSON.stringify(data.data.timings)
+                );
                 setLoading(false);
               }
             }
@@ -205,10 +234,10 @@ const PrayerTimes = () => {
     }
   }, [prayerTimes, madhab]);
 
-  // Calculate segmented progress bar between 12AM and 11:59PM
+  // Calculate progress and marker offsets for 12AM, Fajr, Dhuhr, Asr, Maghrib, Isha, 11:59PM
   let progress = 0;
-  let prayerOffsets = [];
-  let currentPrayerIdx = 0;
+  let markerOffsets = [];
+  let currentMarkerIdx = 0;
   if (prayerTimes) {
     const getTime = (t) => {
       const [h, m] = prayerTimes[t].split(':').map(Number);
@@ -216,28 +245,56 @@ const PrayerTimes = () => {
     };
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
     const totalMinutes = 24 * 60 - 1; // 0 to 1439 (11:59PM)
-    // Progress as fraction of the day
+    // Marker times in minutes
+    const markerTimes = [
+      0, // 12AM
+      getTime('Fajr'),
+      getTime('Dhuhr'),
+      getTime('Asr'),
+      getTime('Maghrib'),
+      getTime('Isha'),
+      totalMinutes, // 11:59PM
+    ];
+    // Use MARKER_OFFSETS directly
+    markerOffsets = MARKER_OFFSETS;
+    // Progress as fraction of the day, mapped to the custom scale
     progress = Math.max(0, Math.min(1, nowMinutes / totalMinutes));
-    // Prayer marker offsets as fraction of the day
-    prayerOffsets = PRAYER_ORDER.map((name) => {
-      const t = getTime(name);
-      return Math.max(0, Math.min(1, t / totalMinutes));
-    });
-    // Find current interval
-    for (let i = 0; i < PRAYER_ORDER.length - 1; i++) {
-      const t1 = getTime(PRAYER_ORDER[i]);
-      const t2 = getTime(PRAYER_ORDER[i + 1]);
-      if (nowMinutes >= t1 && nowMinutes < t2) {
-        currentPrayerIdx = i;
+    // Map progress to the custom scale
+    // Find which segment progress is in
+    let scaledProgress = 0;
+    for (let i = 0; i < markerOffsets.length - 1; i++) {
+      const start = markerTimes[i] / totalMinutes;
+      const end = markerTimes[i + 1] / totalMinutes;
+      if (progress >= start && progress <= end) {
+        // Linear interpolation between markerOffsets[i] and markerOffsets[i+1]
+        const local = (progress - start) / (end - start);
+        scaledProgress =
+          markerOffsets[i] + (markerOffsets[i + 1] - markerOffsets[i]) * local;
+        currentMarkerIdx = i;
         break;
       }
-      if (nowMinutes >= t2) currentPrayerIdx = i + 1;
+      if (progress > markerOffsets[markerOffsets.length - 1])
+        currentMarkerIdx = markerOffsets.length - 1;
     }
+    progress = scaledProgress;
   }
+
+  // Animate progress fill on first load or when progress changes
+  useEffect(() => {
+    if (progress > 0) {
+      setAnimatedProgress(0);
+      const timeout = setTimeout(() => {
+        setAnimatedProgress(progress);
+      }, 100); // slight delay for effect
+      return () => clearTimeout(timeout);
+    } else {
+      setAnimatedProgress(progress);
+    }
+  }, [progress]);
 
   return (
     <div
-      className="relative w-full h-full rounded-[25px] bg-white overflow-hidden flex flex-col justify-between px-6 pt-4 pb-0"
+      className="widget-card relative w-full h-full rounded-[25px] bg-white/80 overflow-hidden flex flex-col justify-between px-6 pt-4 pb-0"
       style={{ position: 'relative' }}
     >
       {/* Masjid background image as a pseudo-element */}
@@ -278,23 +335,49 @@ const PrayerTimes = () => {
         <div className="relative">
           <button
             ref={dropdownBtnRef}
-            className="flex items-center justify-center px-3 py-1 bg-white rounded-full text-black text-sm font-semibold shadow-sm border border-black hover:bg-gray-100 transition-colors duration-200 cursor-pointer select-none -tracking-[0.025em]"
+            className="flex items-center justify-center"
             onClick={() => setDropdownOpen((v) => !v)}
             tabIndex={0}
-            style={{ fontFamily: 'Wix Madefor Display', minWidth: 90 }}
+            style={{
+              padding: '0 14px',
+              height: 32,
+              borderRadius: 9999,
+              background: madhabHover
+                ? 'rgba(95,190,146,0.22)'
+                : 'rgba(95,190,146,0.12)',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 1px 4px 0 rgba(0,0,0,0.04)',
+              transition: 'background 0.5s',
+              fontFamily: 'Wix Madefor Display',
+              fontWeight: 600,
+              color: '#1A593A',
+              fontSize: 13,
+              letterSpacing: '-0.01em',
+              gap: 6,
+              minWidth: 80,
+              display: 'flex',
+            }}
+            onMouseEnter={() => setMadhabHover(true)}
+            onMouseLeave={() => setMadhabHover(false)}
+            title="Change Madhab"
           >
-            {madhab.label}
+            <span>{madhab.label}</span>
             <svg
-              className="ml-2 w-4 h-4 text-gray-500"
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
               fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
+              style={{ marginLeft: 0, display: 'inline' }}
+              xmlns="http://www.w3.org/2000/svg"
             >
               <path
+                d="M6 8L10 12L14 8"
+                stroke="#1A593A"
+                strokeWidth="1.7"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M19 9l-7 7-7-7"
               />
             </svg>
           </button>
@@ -339,7 +422,7 @@ const PrayerTimes = () => {
         >
           {/* Bar background */}
           <div
-            className="w-full h-1.5 bg-[#EBEEED] rounded-full"
+            className="w-full h-1.5 bg-[rgba(255,255,255,0.8)z] rounded-full"
             style={{ position: 'absolute', left: 0, top: 0, zIndex: 0 }}
           />
           {/* Progress fill */}
@@ -347,30 +430,27 @@ const PrayerTimes = () => {
             <>
               {/* Progress fill */}
               <div
-                className="h-1.5 bg-[#237D54] rounded-full transition-all duration-500"
+                className="h-1.5 bg-[#237D54] rounded-full transition-all duration-700"
                 style={{
-                  width: `${progress * 100}%`,
+                  width: `${animatedProgress * 100}%`,
                   position: 'absolute',
                   left: 0,
                   top: 0,
                   zIndex: 1,
+                  transition: 'width 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}
               />
               {/* Markers */}
-              {prayerOffsets.map((offset, idx) => (
+              {markerOffsets.map((offset, idx) => (
                 <div
-                  key={PRAYER_ORDER[idx]}
-                  className={`absolute top-0 h-0 flex flex-col items-center ${
-                    idx === currentPrayerIdx ? 'z-10' : 'z-5'
+                  key={MARKER_LABELS[idx]}
+                  className={`absolute top-2 h-4 flex flex-col items-center ${
+                    idx === currentMarkerIdx ? 'z-10' : 'z-5'
                   }`}
-                  style={{ left: `calc(${offset * 100}% - 1px)` }}
+                  style={{ left: `calc(${offset * 100}% - 0px)` }}
                 >
                   <div
-                    className={`w-2 h-2 rounded-full ${
-                      idx === currentPrayerIdx
-                        ? 'bg-transparent'
-                        : 'bg-transparent'
-                    } border-2 border-transparent`}
+                    className={`w-2 h-2 rounded-full bg-transparent`}
                     style={{ marginBottom: 0, marginTop: 0 }}
                   />
                 </div>

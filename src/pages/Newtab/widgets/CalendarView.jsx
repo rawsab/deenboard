@@ -43,13 +43,14 @@ const CalendarView = () => {
 
   return (
     <div
-      className="w-full h-full rounded-[25px] bg-white flex flex-col p-6"
+      className="widget-card w-full h-full rounded-[25px] bg-white/80 flex flex-col p-6"
       style={{ fontFamily: 'Wix Madefor Display', minHeight: 0, minWidth: 0 }}
     >
       {/* Month and year with chevrons */}
       <div className="flex items-center justify-between mb-4 px-12">
         <button
-          className="p-2 rounded-full hover:bg-[#F2F4F3] transition"
+          className="p-2 rounded-full hover:bg-[rgba(0,0,0,0.05)]"
+          style={{ transition: 'background 0.5s' }}
           onClick={() =>
             setView((v) => {
               let m = v.month - 1,
@@ -88,7 +89,8 @@ const CalendarView = () => {
           </div>
         </div>
         <button
-          className="p-2 rounded-full hover:bg-[#F2F4F3] transition"
+          className="p-2 rounded-full hover:bg-[rgba(0,0,0,0.05)]"
+          style={{ transition: 'background 0.5s' }}
           onClick={() =>
             setView((v) => {
               let m = v.month + 1,

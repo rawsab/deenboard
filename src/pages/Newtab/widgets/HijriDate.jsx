@@ -193,7 +193,7 @@ const HijriDate = () => {
 
   return (
     <div
-      className="relative w-full h-full rounded-[25px] overflow-hidden flex"
+      className="widget-card relative w-full h-full rounded-[25px] overflow-hidden flex"
       style={{
         background: 'linear-gradient(30deg, #134830 0%, #246F47 100%)',
       }}
