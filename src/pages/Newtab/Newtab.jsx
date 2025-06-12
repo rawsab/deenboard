@@ -442,15 +442,19 @@ const Newtab = () => {
                 <div
                   className={`col-span-2 row-span-1 col-start-5 row-start-2 ${fadeClass(
                     5
-                  )} bg-white rounded-[25px]`}
+                  )}`}
                   style={fadeStyle(5)}
-                />
+                >
+                  <QuranVerse />
+                </div>
                 <div
                   className={`col-span-2 row-span-1 col-start-5 row-start-3 ${fadeClass(
                     6
-                  )} bg-white rounded-[25px]`}
+                  )}`}
                   style={fadeStyle(6)}
-                />
+                >
+                  <HadithOfTheDay />
+                </div>
               </div>
             </div>
           </div>

@@ -52,6 +52,7 @@ export default function ColorChanger({ onColorChange, initialPercent = 0.16 }) {
   const [percent, setPercent] = useState(initialPercent); // 0-1
   const [morphingBack, setMorphingBack] = useState(false);
   const [morphOrigin, setMorphOrigin] = useState({ left: 0, top: 0 });
+  const [isVisible, setIsVisible] = useState(false);
   const wrapperRef = useRef(null);
   const rectRef = useRef(null);
 
@@ -59,6 +60,12 @@ export default function ColorChanger({ onColorChange, initialPercent = 0.16 }) {
   useEffect(() => {
     if (onColorChange) onColorChange(percent);
   }, [percent, onColorChange]);
+
+  // Fade in effect on mount
+  useEffect(() => {
+    const timeout = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Click outside to close
   useEffect(() => {
@@ -203,6 +210,8 @@ export default function ColorChanger({ onColorChange, initialPercent = 0.16 }) {
         right: 16,
         zIndex: 50,
         userSelect: 'none',
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 0.5s ease-in-out',
       }}
       ref={wrapperRef}
     >

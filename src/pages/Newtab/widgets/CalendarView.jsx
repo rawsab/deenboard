@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const DAY_COLOR = '#BDC8C2';
@@ -6,6 +6,7 @@ const SQUARE_BG = '#EBEEED';
 const SQUARE_TEXT = '#6D8579';
 const TODAY_BG = '#14452D';
 const TODAY_TEXT = '#fff';
+const EVENT_DOT_COLOR = '#13452D';
 
 function getMonthName(monthIdx) {
   return new Date(2000, monthIdx, 1).toLocaleString('default', {
@@ -21,12 +22,24 @@ function getFirstDayOfWeek(year, month) {
   return new Date(year, month, 1).getDay();
 }
 
+function getDayKey(year, month, day) {
+  // YYYY-MM-DD
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(
+    2,
+    '0'
+  )}`;
+}
+
 const CalendarView = () => {
   const today = new Date();
   const [view, setView] = useState({
     year: today.getFullYear(),
     month: today.getMonth(),
   });
+  const [eventDays, setEventDays] = useState({}); // { 'YYYY-MM-DD': true }
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [signedIn, setSignedIn] = useState(true);
+
   const daysInMonth = getDaysInMonth(view.year, view.month);
   const firstDay = getFirstDayOfWeek(view.year, view.month);
   const isToday = (d) =>
@@ -38,8 +51,90 @@ const CalendarView = () => {
   const squares = [];
   for (let i = 0; i < firstDay; i++) squares.push(null);
   for (let d = 1; d <= daysInMonth; d++) squares.push(d);
-  // Pad to fill last week
   while (squares.length % 7 !== 0) squares.push(null);
+
+  // Fetch Google Calendar events for the visible month
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchEvents() {
+      setLoadingEvents(true);
+      setEventDays({});
+      setSignedIn(true);
+      if (!window.chrome?.identity) {
+        setSignedIn(false);
+        setLoadingEvents(false);
+        return;
+      }
+      window.chrome.identity.getAuthToken(
+        { interactive: false },
+        async (token) => {
+          if (!token) {
+            setSignedIn(false);
+            setLoadingEvents(false);
+            return;
+          }
+          try {
+            // Get all events for the visible month
+            const start = new Date(
+              view.year,
+              view.month,
+              1,
+              0,
+              0,
+              0,
+              0
+            ).toISOString();
+            const end = new Date(
+              view.year,
+              view.month,
+              daysInMonth,
+              23,
+              59,
+              59,
+              999
+            ).toISOString();
+            const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=250&orderBy=startTime&singleEvents=true&timeMin=${encodeURIComponent(
+              start
+            )}&timeMax=${encodeURIComponent(end)}`;
+            const res = await fetch(url, {
+              headers: { Authorization: 'Bearer ' + token },
+            });
+            if (!res.ok) throw new Error('Failed to fetch events');
+            const data = await res.json();
+            if (!cancelled && data.items) {
+              // Mark days with at least one event
+              const daysWithEvents = {};
+              for (const ev of data.items) {
+                const startDate = ev.start?.dateTime || ev.start?.date;
+                if (!startDate) continue;
+                const dateObj = new Date(startDate);
+                if (
+                  dateObj.getFullYear() === view.year &&
+                  dateObj.getMonth() === view.month
+                ) {
+                  const key = getDayKey(
+                    view.year,
+                    view.month,
+                    dateObj.getDate()
+                  );
+                  daysWithEvents[key] = true;
+                }
+              }
+              setEventDays(daysWithEvents);
+            }
+          } catch {
+            if (!cancelled) setEventDays({});
+          } finally {
+            if (!cancelled) setLoadingEvents(false);
+          }
+        }
+      );
+    }
+    fetchEvents();
+    return () => {
+      cancelled = true;
+    };
+  }, [view.year, view.month]);
 
   return (
     <div
@@ -75,12 +170,17 @@ const CalendarView = () => {
           </svg>
         </button>
         <div className="flex flex-col items-center flex-1">
-          <div
-            className="text-xl font-semibold -tracking-[0.03em]"
+          <a
+            href={`https://calendar.google.com/calendar/r/month/${
+              view.year
+            }/${String(view.month + 1).padStart(2, '0')}/01`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xl font-semibold -tracking-[0.03em] cursor-pointer"
             style={{ color: '#2B2B2B' }}
           >
             {getMonthName(view.month)}
-          </div>
+          </a>
           <div
             className="text-sm font-medium -tracking-[0.02em]"
             style={{ color: '#7E8884' }}
@@ -116,7 +216,7 @@ const CalendarView = () => {
         </button>
       </div>
       {/* Days of week */}
-      <div className="grid grid-cols-7 gap-[2px] mb-2">
+      <div className="grid grid-cols-7 gap-[2px] mb-3">
         {DAYS.map((d) => (
           <div
             key={d}
@@ -128,27 +228,56 @@ const CalendarView = () => {
         ))}
       </div>
       {/* Dates grid */}
-      <div className="grid grid-cols-7 gap-[2px] flex-1 items-center justify-items-center pb-0">
-        {squares.map((d, i) =>
-          d ? (
-            <div
-              key={i}
-              className="flex items-center justify-center rounded-[8px] text-sm font-semibold select-none"
-              style={{
-                background: isToday(d) ? TODAY_BG : SQUARE_BG,
-                color: isToday(d) ? TODAY_TEXT : SQUARE_TEXT,
-                minHeight: 0,
-                aspectRatio: '1/1',
-                height: 28,
-                transition: 'background 0.5s, color 0.5s',
-              }}
-            >
-              {d}
+      <div className="grid grid-cols-7 gap-[2px] flex-1 items-start justify-items-center pb-0">
+        {squares.map((d, i) => {
+          if (!d) return <div key={i} />;
+          const key = getDayKey(view.year, view.month, d);
+          const hasEvent = !!eventDays[key];
+          // Google Calendar URL for this date
+          const gcalUrl = `https://calendar.google.com/calendar/r/day/${
+            view.year
+          }/${String(view.month + 1).padStart(2, '0')}/${String(d).padStart(
+            2,
+            '0'
+          )}`;
+          const isCurrent = isToday(d);
+          return (
+            <div key={i} className="flex flex-col items-center">
+              <a
+                href={gcalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                tabIndex={0}
+                className={
+                  `flex items-center justify-center rounded-[8px] text-sm font-semibold select-none transition-colors duration-200 focus:outline-none` +
+                  (isCurrent
+                    ? ' bg-[#14452D] text-white hover:bg-[#0e2e1d]'
+                    : ' bg-[#EBEEED] text-[#6D8579] hover:bg-[#E0E5E3]')
+                }
+                style={{
+                  minHeight: 0,
+                  aspectRatio: '1/1',
+                  height: 28,
+                  cursor: 'pointer',
+                }}
+                title="Open Google Calendar for this date"
+              >
+                {d}
+              </a>
+              {/* Always reserve space for the dot */}
+              <span
+                style={{
+                  display: 'block',
+                  width: 4,
+                  height: 4,
+                  borderRadius: '50%',
+                  background: hasEvent ? EVENT_DOT_COLOR : 'transparent',
+                  marginTop: 3,
+                }}
+              />
             </div>
-          ) : (
-            <div key={i} />
-          )
-        )}
+          );
+        })}
       </div>
     </div>
   );

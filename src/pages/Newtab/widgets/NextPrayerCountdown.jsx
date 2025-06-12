@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AlarmIcon from '../../../assets/img/icons/alarm-icon.svg';
+import azanSound from '../../../assets/audio/azan1.mp3';
 
 const PRAYER_ORDER = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
@@ -54,15 +55,18 @@ const NextPrayerCountdown = () => {
   });
   const [prayerTimes, setPrayerTimes] = useState(() => {
     const stored = localStorage.getItem(PRAYER_TIMES_KEY);
-    return stored ? JSON.parse(stored) : null;
+    const parsed = stored ? JSON.parse(stored) : null;
+    return parsed;
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [now, setNow] = useState(new Date());
   const [alarmHover, setAlarmHover] = useState(false);
+  const audioRef = useRef(null);
+  const lastPlayedRef = useRef(null);
 
   useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 60000);
+    const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -141,6 +145,43 @@ const NextPrayerCountdown = () => {
   const totalMins = Math.max(0, Math.floor(diffMs / 60000));
   const hours = Math.floor(totalMins / 60);
   const mins = totalMins % 60;
+
+  // Play azan sound if alarm is enabled and it is prayer time
+  useEffect(() => {
+    if (alarmEnabled && prayerTimes) {
+      const currentTime = new Date();
+      const isPrayerTime = PRAYER_ORDER.some((name) => {
+        const [h, m] = prayerTimes[name]?.split(':').map(Number) || [0, 0];
+        const prayerTime = new Date(currentTime);
+        prayerTime.setHours(h, m, 0, 0);
+        // Play if within the first 60 seconds of the prayer time
+        return (
+          currentTime >= prayerTime &&
+          currentTime < new Date(prayerTime.getTime() + 60000)
+        );
+      });
+      if (isPrayerTime) {
+        try {
+          if (!audioRef.current) {
+            audioRef.current = new Audio(azanSound);
+          }
+          audioRef.current.play();
+        } catch (err) {
+          console.error('Error playing azan:', err);
+        }
+      }
+    }
+  }, [alarmEnabled, prayerTimes, now]);
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div

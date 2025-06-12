@@ -61,6 +61,14 @@ function AnimatedDots() {
 
 const PRAYER_TIMES_KEY = 'deenboard_prayer_times';
 
+// Helper to check if a prayer time has passed
+function hasPrayerPassed(prayerTime) {
+  const [h, m] = prayerTime.split(':').map(Number);
+  const prayerDate = new Date();
+  prayerDate.setHours(h, m, 0, 0);
+  return prayerDate < new Date();
+}
+
 const PrayerTimes = () => {
   // Persist madhab selection in localStorage
   const [madhab, setMadhab] = useState(() => {
@@ -196,7 +204,7 @@ const PrayerTimes = () => {
         // Always fetch and cache new data in the background
         const fetchAndCache = async (madhabId, cacheKey) => {
           try {
-            const apiUrl = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${latitude}&longitude=${longitude}&method=2&madhab=${madhabId}`;
+            const apiUrl = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${latitude}&longitude=${longitude}&method=2&school=${madhabId}`;
             const res = await fetch(apiUrl);
             const data = await res.json();
             if (data.code === 200 && data.data && data.data.timings) {
@@ -384,13 +392,19 @@ const PrayerTimes = () => {
           {dropdownOpen &&
             ReactDOM.createPortal(
               <div
-                className="w-[100px] bg-white rounded-xl shadow-lg z-[1000] transition-opacity duration-200"
+                className="w-[120px] rounded-xl shadow-lg z-[1000] transition-opacity duration-300"
                 style={{
-                  position: 'absolute',
+                  position: 'fixed',
                   top: dropdownPos.top,
-                  left: dropdownPos.left + dropdownPos.width - 100,
+                  left: dropdownPos.left + dropdownPos.width - 120,
                   opacity: dropdownOpen ? 1 : 0,
                   pointerEvents: dropdownOpen ? 'auto' : 'none',
+                  background: 'rgba(255,255,255,0.65)',
+                  backdropFilter: 'blur(16px) saturate(1.2)',
+                  WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
+                  border: '1px solid rgba(180,200,190,0.18)',
+                  boxShadow: '0 4px 24px 0 rgba(44,62,80,0.08)',
+                  transition: 'opacity 0.3s',
                 }}
               >
                 {MADHABS.filter((m) => m.value !== madhab.value).map((m) => (
@@ -422,7 +436,7 @@ const PrayerTimes = () => {
         >
           {/* Bar background */}
           <div
-            className="w-full h-1.5 bg-[rgba(255,255,255,0.8)z] rounded-full"
+            className="w-full h-1.5 bg-[rgba(0,0,0,0.1)] rounded-full"
             style={{ position: 'absolute', left: 0, top: 0, zIndex: 0 }}
           />
           {/* Progress fill */}
@@ -465,7 +479,14 @@ const PrayerTimes = () => {
           <div key={name} className="flex flex-col items-center min-w-[60px]">
             <span
               className="text-[#2B2B2B] text-[1.0rem] font-medium -mt-3 mb-1 -tracking-[0.025em] transition-opacity duration-500"
-              style={{ fontFamily: 'Wix Madefor Display', opacity: 1 }}
+              style={{
+                fontFamily: 'Wix Madefor Display',
+                opacity: loading
+                  ? 0
+                  : prayerTimes && hasPrayerPassed(prayerTimes[name])
+                  ? 0.5
+                  : 1,
+              }}
             >
               {name}
             </span>
@@ -475,7 +496,11 @@ const PrayerTimes = () => {
                 className="text-[#7E8884] text-sm font-regular -tracking-[0.025em] transition-opacity duration-500 ml-0"
                 style={{
                   fontFamily: 'Wix Madefor Display',
-                  opacity: loading ? 0 : 1,
+                  opacity: loading
+                    ? 0
+                    : prayerTimes && hasPrayerPassed(prayerTimes[name])
+                    ? 0.6
+                    : 1,
                 }}
               >
                 {prayerTimes ? formatTime24to12(prayerTimes[name]) : ''}
