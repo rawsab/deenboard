@@ -2,4 +2,4 @@
 
 A beautiful Islamic-themed home page dashboard. Coming soon to the Chrome Web Store.
 
-![717shots_so](https://github.com/user-attachments/assets/e7c2d014-b62f-4653-88fd-9f3a81bdd886)
+![DeenBoard_Screenshot](https://github.com/user-attachments/assets/6420fe0a-93e5-4a5d-83ce-d1082cddedc3)
