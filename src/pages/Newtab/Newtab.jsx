@@ -18,6 +18,7 @@ import ColorChanger from './widgets/ColorChanger';
 const CELL_SIZE = 170;
 const MIN_WIDTH = 1200;
 const MAX_WIDTH = 1500;
+const MIN_HEIGHT = 800;
 
 const Widget = ({ name, className }) => (
   <div
@@ -100,9 +101,14 @@ const Newtab = () => {
   useEffect(() => {
     function handleResize() {
       const w = window.innerWidth;
-      let s = 1;
-      if (w < MIN_WIDTH) s = w / MIN_WIDTH;
-      else if (w > MAX_WIDTH) s = w / (MIN_WIDTH + 300);
+      const h = window.innerHeight;
+      let sW = 1;
+      let sH = 1;
+      if (w < MIN_WIDTH) sW = w / MIN_WIDTH;
+      else if (w > MAX_WIDTH) sW = w / (MIN_WIDTH + 300);
+      if (h < MIN_HEIGHT) sH = h / MIN_HEIGHT;
+      // You can add an upper bound for height if desired, but usually not needed
+      let s = Math.min(sW, sH);
       if (s < 0.8) s = 0.8;
       if (s > 1.5) s = 1.5;
       setScale(s);
