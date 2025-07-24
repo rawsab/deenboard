@@ -39,7 +39,7 @@ const Newtab = () => {
   const [fadePencil, setFadePencil] = useState(false);
   const searchInputRef = useRef(null);
   const [name, setName] = useState(
-    () => localStorage.getItem(NAME_KEY) || 'Rawsab'
+    () => localStorage.getItem(NAME_KEY) || 'User'
   );
   const [editing, setEditing] = useState(false);
   const [lastSavedName, setLastSavedName] = useState(name);
@@ -49,6 +49,7 @@ const Newtab = () => {
     return saved !== null ? parseFloat(saved) : 0.16;
   });
   const [scale, setScale] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Map percent to hue-rotate (red=0deg, green=120deg, blue=240deg, violet=270deg)
   function percentToHue(percent) {
@@ -153,6 +154,20 @@ const Newtab = () => {
       setName(lastSavedName);
     }
     setEditing(false);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      if (window.chrome && chrome.search && chrome.search.query) {
+        chrome.search.query({
+          text: searchQuery,
+          disposition: 'CURRENT_TAB',
+        });
+      } else {
+        window.location.href = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+      }
+    }
   };
 
   return (
@@ -334,9 +349,7 @@ const Newtab = () => {
                 {/* Right: Google search bar */}
                 <div className="search-bar">
                   <form
-                    action="https://www.google.com/search"
-                    method="GET"
-                    target="_blank"
+                    onSubmit={handleSearchSubmit}
                     className={`flex items-center flex-shrink-0 transition-opacity duration-700 ${
                       fadeSearch ? 'opacity-100' : 'opacity-0'
                     }`}
@@ -354,6 +367,8 @@ const Newtab = () => {
                         ref={searchInputRef}
                         type="text"
                         name="q"
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
                         placeholder="Search Google..."
                         className="w-full pl-12 pr-14 py-3 rounded-[25px] focus:outline-none focus:ring-2 focus:ring-[#1A593A] text-base bg-white"
                         style={{

@@ -40,5 +40,5 @@
     "client_id": "252877932218-9ra7i1vf0lj3fal4m114moumn2su2hhp.apps.googleusercontent.com",
     "scopes": ["https://www.googleapis.com/auth/calendar.readonly"]
   },
-  "permissions": ["identity"]
+  "permissions": ["identity", "search"]
 }
