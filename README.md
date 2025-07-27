@@ -1,12 +1,13 @@
 # 🕌 DeenBoard
 
-A beautiful Islamic-themed home page dashboard. Coming soon to the Chrome Web Store.
+A beautiful Islamic-themed home page dashboard. Available on the [Chrome Web Store](https://chromewebstore.google.com/detail/llebjeodihhgoiocodiimhbcgcnodanl?utm_source=item-share-cb).
 
 ![DeenBoard_Screenshot](https://github.com/user-attachments/assets/6420fe0a-93e5-4a5d-83ce-d1082cddedc3)
 
 # Installing the Extension
 
-DeenBoard is currently available as an external extension and will be available in the Chrome Web Store soon.
+It is recommended to install the extension directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/llebjeodihhgoiocodiimhbcgcnodanl?utm_source=item-share-cb). \
+Otherwise, to install DeenBoard locally, follow the steps below:
 
 ## Prerequisites
 - Google Chrome (latest version recommended)
