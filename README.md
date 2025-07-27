@@ -2,7 +2,10 @@
 
 A beautiful Islamic-themed home page dashboard. Available on the [Chrome Web Store](https://chromewebstore.google.com/detail/llebjeodihhgoiocodiimhbcgcnodanl?utm_source=item-share-cb).
 
-![DeenBoard_Screenshot](https://github.com/user-attachments/assets/6420fe0a-93e5-4a5d-83ce-d1082cddedc3)
+<!-- ![DeenBoard_Screenshot](https://github.com/user-attachments/assets/6420fe0a-93e5-4a5d-83ce-d1082cddedc3) -->
+
+<img width="2499" height="1440" alt="DeenBoard Demo" src="https://github.com/user-attachments/assets/c018f4b3-bc13-4799-93a4-b30d211b1182" />
+
 
 # Installing the Extension
 
