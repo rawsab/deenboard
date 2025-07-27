@@ -46,7 +46,7 @@ const Newtab = () => {
   const nameInputRef = useRef(null);
   const [huePercent, setHuePercent] = useState(() => {
     const saved = localStorage.getItem(HUE_KEY);
-    return saved !== null ? parseFloat(saved) : 0.16;
+    return saved !== null ? parseFloat(saved) : 0;
   });
   const [scale, setScale] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');

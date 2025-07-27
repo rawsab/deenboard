@@ -47,7 +47,7 @@ const RECT_WIDTH = 240;
 const RECT_HEIGHT = 18;
 const SELECTOR_RADIUS = 12;
 
-export default function ColorChanger({ onColorChange, initialPercent = 0.16 }) {
+export default function ColorChanger({ onColorChange, initialPercent = 0 }) {
   const [open, setOpen] = useState(false);
   const [percent, setPercent] = useState(initialPercent); // 0-1
   const [morphingBack, setMorphingBack] = useState(false);
