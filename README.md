@@ -31,3 +31,7 @@ Otherwise, to install DeenBoard locally, follow the steps below:
 3. Click **“Load unpacked”**.
 4. Select the **unpacked `build/` folder** (the one you just unzipped).
 5. DeenBoard will now appear in the list and be ready to use!
+
+---
+
+Built with [Tailwind React Chrome Extension Template](https://github.com/yewsiang/tailwind-react-chrome-extension-template).
